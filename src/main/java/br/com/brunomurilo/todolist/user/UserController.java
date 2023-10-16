@@ -9,29 +9,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping("/users") //caminho | rota
 public class UserController {
-    
+
     @Autowired /*Gerencia todo ciclo */
     private IUserRepository userRepository;
 
     @PostMapping("/")
-    public ResponseEntity create(@RequestBody UserModel userModel){
-        /*ResponseEntity = Ter retornos diferentes na aplicaçao dentro da mesma requisiçao*/
-        /*Tratamento de usuario */
-        var user = this.userRepository.findByUsername(userModel.getUsername());
-        if(user != null){
+     /*ResponseEntity = Ter retornos diferentes na aplicaçao dentro da mesma requisiçao*/
+    public ResponseEntity create(@RequestBody UserModel userModel) {
+    /*Tratamento de usuario */
+        var user = userRepository.findByUsername(userModel.getUsername());
+        if (user != null) {
+            System.out.println("Usuario já existe");
+
             //mensagem de erro ou Status Code "400 - erro"
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário já existente!"); //mostra diretamente no retorno do JSON
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário já existe!");
         }
 
-        var passwordHashred = BCrypt.withDefaults().hashToString(12, userModel.getPassword().toCharArray()); //criptografia de senha
+        var passwordHashed = BCrypt.withDefaults()
+                .hashToString(12, userModel.getPassword().toCharArray());
 
-        userModel.setPassword(passwordHashred); //setando senha
+        userModel.setPassword(passwordHashed); //setando senha ***
 
-        var userCreated = this.userRepository.save(userModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
+        var userCreated = userRepository.save(userModel);
+        return ResponseEntity.status(HttpStatus.OK).body(userCreated);
     }
 }
